@@ -1,0 +1,10 @@
+langgraph
+langchain-core
+langchain-openai
+langchain
+akshare
+pydantic
+python-dotenv
+pandas
+matplotlib
+tqdm
