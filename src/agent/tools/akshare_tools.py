@@ -71,6 +71,45 @@ def get_stock_daily_hq(symbol: str, days: int = 365, max_retries: int = 3) -> pd
 
     return pd.DataFrame()
 
+
+def get_us_stock_daily_hq(symbol: str, days: int = 365) -> pd.DataFrame:
+    """使用 yfinance 获取美股历史行情数据(日频)，默认获取最近一年的数据"""
+    from datetime import datetime, timedelta
+    try:
+        import yfinance as yf
+    except ImportError:
+        print("yfinance not installed. Please run: pip install yfinance")
+        return pd.DataFrame()
+
+    start_date = (datetime.now() - timedelta(days=days)).strftime('%Y-%m-%d')
+    end_date = datetime.now().strftime('%Y-%m-%d')
+    
+    try:
+        ticker = yf.Ticker(symbol)
+        df = ticker.history(start=start_date, end=end_date)
+        
+        if not df.empty:
+            df = df.reset_index()
+            # 把 yfinance 的英文列名统一转换为中文，与 A股/期货下游分析逻辑兼容
+            df = df.rename(columns={
+                "Date": "日期",
+                "Open": "开盘",
+                "High": "最高",
+                "Low": "最低",
+                "Close": "收盘",
+                "Volume": "成交量"
+            })
+            # 转换日期格式：yfinance 返回带时区的 datetime，统一格式化为纯日期字符串
+            df['日期'] = pd.to_datetime(df['日期']).dt.strftime('%Y-%m-%d')
+            return df[['日期', '开盘', '最高', '最低', '收盘', '成交量']]
+        
+        print(f"yfinance: No data returned for US stock {symbol}")
+        return pd.DataFrame()
+    except Exception as e:
+        print(f"Error fetching US stock {symbol} via yfinance: {e}")
+        return pd.DataFrame()
+
+
 def get_future_daily_hq(symbol: str, max_retries: int = 3) -> pd.DataFrame:
     """获取国内期货历史行情数据(日频)
     symbol 示例: 'RB0' (螺纹钢连续), 'M0' (豆粕连续) 或者具体的合约如 'rb2405'

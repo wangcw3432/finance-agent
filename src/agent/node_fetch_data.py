@@ -1,5 +1,5 @@
 from .state import AgentState
-from .tools.akshare_tools import get_stock_daily_hq, get_future_daily_hq, get_stock_fundamental
+from .tools.akshare_tools import get_stock_daily_hq, get_future_daily_hq, get_stock_fundamental, get_us_stock_daily_hq
 
 def fetch_data(state: AgentState) -> AgentState:
     """第二步：数据获取节点"""
@@ -30,6 +30,17 @@ def fetch_data(state: AgentState) -> AgentState:
                 fundamental_data[code] = fund_data
             else:
                 fundamental_data[code] = {"error": "Failed to fetch fundamental data"}
+
+        elif atype == "stock_us":
+            # 拉取美股日线数据
+            us_df = get_us_stock_daily_hq(code)
+            if not us_df.empty:
+                market_data[code] = us_df.tail(60).to_dict('records')
+            else:
+                market_data[code] = {"error": "Failed to fetch US stock data"}
+            
+            # 美股基本面暂不通过该接口获取，留空或给提示
+            fundamental_data[code] = {"error": "US stock fundamental data not available via current api"}
 
         elif atype == "future":
             # 拉取期货日线数据

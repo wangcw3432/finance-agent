@@ -98,7 +98,7 @@ div[data-testid="stVerticalBlock"] > div:has(#sticky-header-anchor) {
 }
 </style>
 <h1 style="margin:0; font-size: 2.2rem; font-weight: 700; color: #F8FAFC;">📈个人投研分析助手</h1>
-<p style="margin: 0.5rem 0 0 0; color: #94A3B8; font-size: 1.1rem;">A 股与国内期货智能投研分析 Agent。</p>
+<p style="margin: 0.5rem 0 0 0; color: #94A3B8; font-size: 1.1rem;">支持 <strong style="color:#F59E0B">A股 / 美股 / 国内期货</strong> 三市场深度投研，由 AI 首席分析师驱动。</p>
 """
 st.markdown(header_html, unsafe_allow_html=True)
 
@@ -130,14 +130,30 @@ with st.sidebar:
     else:
         st.error("未检测到 API Key，请检查 .env 配置")
         st.warning("在此状态下只能测试异常流。")
+    
+    st.divider()
+    st.markdown("""**💡 使用说明**
+
+支持以下三大市场：
+
+🇨🇳 **A股**：直接输入名称或代码
+> 如：宁德时代、002594
+
+🇺🇸 **美股**：使用英文 Ticker 代码
+> 如：AAPL苹果、NVDA英伟达
+
+📦 **国内期货**：主力连续合约
+> 如：螺纹钢RB888、豆粕M888
+""")
 
     if st.button("清除对话重置状态"):
         st.session_state.messages = []
         st.session_state.thread_id = str(uuid.uuid4())
         st.rerun()
 
+
 # 接受用户输入
-if prompt := st.chat_input("请输入您想查询的股票或期货，比如“帮我分析一下宁德时代近期的技术面以及基本面情况”"):
+if prompt := st.chat_input("🇨🇳 A股：宁德时代  |  🇺🇸 美股：NVDA英伟达  |  📦 期货：螺纹钢RB888"):
     # 1. 把用户的输入添加到 UI 消息列表并立刻展示
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
